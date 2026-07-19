@@ -16,6 +16,8 @@ const ProtectedRoute = ({ children, requireAdmin }: { children: React.ReactNode,
 
 import { Toaster } from 'react-hot-toast';
 
+import NotFound from './pages/NotFound';
+
 function AppRoutes() {
   return (
     <Routes>
@@ -29,6 +31,9 @@ function AppRoutes() {
 
       {/* Admin Panel Routes */}
       <Route path="/dashboard/admin/*" element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>} />
+      
+      {/* 404 Route */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

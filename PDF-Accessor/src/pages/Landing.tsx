@@ -10,9 +10,7 @@ const Landing = () => {
   const { user, isAuthenticated } = useAuth();
 
   React.useEffect(() => {
-    if (isAuthenticated && user?.role === 'Super Admin') {
-      navigate('/dashboard/admin');
-    }
+    // If the user wants to stay on landing page, let them. We'll show a button to go to the dashboard instead.
   }, [isAuthenticated, user, navigate]);
 
   return (
@@ -50,12 +48,21 @@ const Landing = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <button 
-              onClick={() => navigate('/phases')}
-              className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all"
-            >
-              Get Premium Notes
-            </button>
+            {(user?.role === 'Super Admin' || user?.role === 'Admin') ? (
+              <button 
+                onClick={() => navigate('/dashboard/admin')}
+                className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all"
+              >
+                Go to Admin Dashboard
+              </button>
+            ) : (
+              <button 
+                onClick={() => navigate('/phases')}
+                className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all"
+              >
+                Get Premium Notes
+              </button>
+            )}
             <button 
               className="w-full sm:w-auto px-8 py-3.5 bg-gray-900 text-white font-bold text-lg rounded-xl shadow-lg hover:bg-gray-800 transition-all flex items-center justify-center gap-2"
             >
