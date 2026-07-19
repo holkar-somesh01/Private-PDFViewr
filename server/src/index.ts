@@ -61,7 +61,9 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   res.status(500).json({ message: 'Something went wrong on the server' });
 });
 
-if (process.env.NODE_ENV !== 'production') {
+// Only skip app.listen if we are running on Vercel (serverless)
+// Render, Heroku, and local environments need app.listen to be called
+if (!process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });

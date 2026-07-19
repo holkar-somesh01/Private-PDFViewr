@@ -3,7 +3,7 @@ import nodemailer from 'nodemailer';
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST || 'smtp.ethereal.email',
   port: parseInt(process.env.EMAIL_PORT || '587'),
-  secure: false,
+  secure: parseInt(process.env.EMAIL_PORT || '587') === 465, // true for 465, false for other ports
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport({
 
 export const sendOTP = async (email: string, otp: string) => {
   const mailOptions = {
-    from: '"Ayurdnyanam" <noreply@ayurdnyanam.com>',
+    from: process.env.EMAIL_FROM || '"Ayurdnyanam" <noreply@ayurdnyanam.com>',
     to: email,
     subject: 'Your Login OTP - Ayurdnyanam',
     html: `
@@ -53,7 +53,7 @@ export const sendOTP = async (email: string, otp: string) => {
 
 export const sendCredentialsEmail = async (email: string, password: string, loginUrl: string) => {
   const mailOptions = {
-    from: '"Ayurdnyanam" <noreply@ayurdnyanam.com>',
+    from: process.env.EMAIL_FROM || '"Ayurdnyanam" <noreply@ayurdnyanam.com>',
     to: email,
     subject: 'Welcome! Your Account Credentials',
     html: `
