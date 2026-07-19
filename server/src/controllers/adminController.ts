@@ -35,6 +35,7 @@ export const getDashboardStats = async (req: Request, res: Response): Promise<vo
       totalPhases,
       totalPDFs,
       recentLogins: formattedLogins,
+      maxUsers: 500,
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error fetching dashboard stats' });
@@ -85,6 +86,12 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
     const exists = await User.findOne({ email });
     if (exists) {
       res.status(400).json({ message: 'User already exists' });
+      return;
+    }
+
+    const currentUsers = await User.countDocuments({ role: 'User', isDeleted: { $ne: true } });
+    if (currentUsers >= 500) {
+      res.status(403).json({ message: 'User limit reached. Cannot create more than 500 users.' });
       return;
     }
 

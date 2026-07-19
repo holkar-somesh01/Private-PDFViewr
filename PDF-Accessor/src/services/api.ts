@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const baseURL = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:5000/api`;
+
 const api = axios.create({
-  baseURL: `http://${window.location.hostname}:5000/api`, // adjust for production later
+  baseURL,
   withCredentials: true, // Required to send HTTP-only cookies like refreshToken
 });
 
@@ -22,7 +24,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url?.includes('/refresh-token')) {
       originalRequest._retry = true;
       try {
-        const res = await axios.post(`http://${window.location.hostname}:5000/api/auth/refresh-token`, {}, { withCredentials: true });
+        const res = await axios.post(`${baseURL}/auth/refresh-token`, {}, { withCredentials: true });
         
         if (res.data && res.data.accessToken) {
           localStorage.setItem('token', res.data.accessToken);

@@ -9,13 +9,22 @@ interface DashboardOverviewProps {
 const DashboardOverview: React.FC<DashboardOverviewProps> = ({ usersCount, pdfsCount }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-5 hover:shadow-md transition-shadow group">
+      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-5 hover:shadow-md transition-shadow group relative overflow-hidden">
         <div className="p-4 bg-blue-50 text-blue-600 rounded-2xl group-hover:scale-110 group-hover:bg-blue-500 group-hover:text-white transition-all duration-300">
           <Users className="w-8 h-8" />
         </div>
-        <div>
+        <div className="flex-1">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total Users</p>
-          <p className="text-4xl font-black text-slate-800 tracking-tight">{usersCount}</p>
+          <div className="flex items-baseline gap-2">
+            <p className="text-4xl font-black text-slate-800 tracking-tight">{usersCount}</p>
+            <p className="text-sm font-semibold text-slate-500">/ 500 limit</p>
+          </div>
+          <div className="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
+            <div 
+              className={`h-full rounded-full transition-all duration-500 ${usersCount >= 500 ? 'bg-red-500' : 'bg-blue-500'}`}
+              style={{ width: `${Math.min((usersCount / 500) * 100, 100)}%` }}
+            />
+          </div>
         </div>
       </div>
 

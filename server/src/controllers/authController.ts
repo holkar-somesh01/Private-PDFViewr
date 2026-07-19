@@ -23,10 +23,11 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
       await LoginLog.create({ userId: user._id, emailAttempted: email, ipAddress, userAgent, status: 'Success' });
 
+      const isProduction = process.env.NODE_ENV === 'production';
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'strict',
         maxAge: 1 * 24 * 60 * 60 * 1000, // 1 day
       });
 
@@ -50,10 +51,11 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const logout = async (req: Request, res: Response): Promise<void> => {
+  const isProduction = process.env.NODE_ENV === 'production';
   res.clearCookie('refreshToken', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'strict',
   });
   res.json({ message: 'Logged out successfully' });
 };
