@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
-import rateLimit from 'express-rate-limit';
+import { rateLimit } from 'express-rate-limit';
 import { connectDB } from './config/db.js';
 import authRoutes from './routes/auth.js';
 import adminRoutes from './routes/admin.js';
@@ -19,6 +19,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Security Middlewares
+// @ts-ignore - TS NodeNext typing issue with helmet default export
 app.use(helmet({
   crossOriginResourcePolicy: false,
 }));
@@ -36,7 +37,7 @@ const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
   message: 'Too many requests from this IP, please try again after 15 minutes',
-  skip: (req) => req.originalUrl.startsWith('/api/admin') || req.originalUrl.startsWith('/api/audit'),
+  skip: (req: express.Request) => req.originalUrl.startsWith('/api/admin') || req.originalUrl.startsWith('/api/audit'),
 });
 app.use('/api/', apiLimiter);
 
