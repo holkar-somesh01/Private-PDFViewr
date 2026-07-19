@@ -15,6 +15,7 @@ import EditUserModal from '../components/admin/modals/EditUserModal';
 import AuditManagement from '../components/admin/AuditManagement';
 import UploadPdfModal from '../components/admin/modals/UploadPdfModal';
 import ManageAccessModal from '../components/admin/modals/ManageAccessModal';
+import EditPdfModal from '../components/admin/modals/EditPdfModal';
 
 const AdminDashboard = () => {
   const { user, logout } = useAuth();
@@ -22,7 +23,7 @@ const AdminDashboard = () => {
 
   const params = useParams();
   const activeTab = params['*'] || 'dashboard';
-  
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
@@ -44,8 +45,10 @@ const AdminDashboard = () => {
   const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
   const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
   const [isUploadPdfModalOpen, setIsUploadPdfModalOpen] = useState(false);
+  const [isEditPdfModalOpen, setIsEditPdfModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
-  
+  const [editingPdf, setEditingPdf] = useState<any>(null);
+
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [selectedPhaseIds, setSelectedPhaseIds] = useState<string[]>([]);
 
@@ -157,6 +160,44 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleEditPdfSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const formData = new FormData();
+      formData.append('title', editingPdf.title);
+      formData.append('description', editingPdf.description);
+      formData.append('phaseId', editingPdf.phaseId);
+      formData.append('status', editingPdf.status || 'Active');
+      if (editingPdf.order !== undefined) formData.append('order', editingPdf.order.toString());
+      if (pdfFile) formData.append('pdf', pdfFile);
+      if (thumbnailFile) formData.append('thumbnail', thumbnailFile);
+
+      await api.put(`/admin/pdfs/${editingPdf._id || editingPdf.id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      fetchPdfs();
+      setIsEditPdfModalOpen(false);
+      setEditingPdf(null);
+      setPdfFile(null);
+      setThumbnailFile(null);
+      toast.success('PDF updated successfully!');
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Error updating PDF');
+    }
+  };
+
+  const handleDeletePdf = async (pdfId: string) => {
+    if (!window.confirm('Are you sure you want to delete this PDF? This will also remove the files.')) return;
+    try {
+      await api.delete(`/admin/pdfs/${pdfId}`);
+      fetchPdfs();
+      toast.success('PDF deleted successfully!');
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Error deleting PDF');
+    }
+  };
+
   const handleToggleBlock = async (userObj: any) => {
     try {
       await api.put(`/admin/users/${userObj._id || userObj.id}`, { isBlocked: !userObj.isBlocked });
@@ -206,17 +247,17 @@ const AdminDashboard = () => {
 
   return (
     <div className="flex h-screen bg-slate-50/50 overflow-hidden font-sans">
-      <AdminSidebar 
-        activeTab={activeTab} 
-        isMobileMenuOpen={isMobileMenuOpen} 
-        setIsMobileMenuOpen={setIsMobileMenuOpen} 
-        user={user} 
+      <AdminSidebar
+        activeTab={activeTab}
+        isMobileMenuOpen={isMobileMenuOpen}
+        setIsMobileMenuOpen={setIsMobileMenuOpen}
+        user={user}
       />
 
       <div className="flex-1 flex flex-col overflow-hidden relative w-full md:w-[calc(100%-18rem)]">
-        <AdminHeader 
-          activeTab={activeTab} 
-          setIsMobileMenuOpen={setIsMobileMenuOpen} 
+        <AdminHeader
+          activeTab={activeTab}
+          setIsMobileMenuOpen={setIsMobileMenuOpen}
           onLogout={handleLogout}
           onRefresh={handleRefresh}
         />
@@ -225,8 +266,8 @@ const AdminDashboard = () => {
           <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
             {activeTab === 'dashboard' && <DashboardOverview usersCount={totalUsers || users.length} pdfsCount={pdfs.length} />}
             {activeTab === 'users' && (
-              <UserManagement 
-                users={users} 
+              <UserManagement
+                users={users}
                 totalUsers={totalUsers || users.length}
                 currentPage={currentPage}
                 totalPages={totalPages}
@@ -245,14 +286,26 @@ const AdminDashboard = () => {
                     setOrder('asc');
                   }
                 }}
-                openAssignModal={openAssignModal} 
-                openCreateModal={() => setIsCreateUserModalOpen(true)} 
+                openAssignModal={openAssignModal}
+                openCreateModal={() => setIsCreateUserModalOpen(true)}
                 openEditModal={(u) => { setEditingUser(u); setIsEditUserModalOpen(true); }}
                 handleDeleteUser={handleDeleteUser}
                 handleToggleBlock={handleToggleBlock}
               />
             )}
-            {activeTab === 'pdfs' && <PdfManagement pdfs={pdfs} openUploadModal={() => setIsUploadPdfModalOpen(true)} />}
+            {activeTab === 'pdfs' && (
+              <PdfManagement
+                pdfs={pdfs}
+                openUploadModal={() => setIsUploadPdfModalOpen(true)}
+                openEditModal={(p) => {
+                  setEditingPdf(p);
+                  setPdfFile(null);
+                  setThumbnailFile(null);
+                  setIsEditPdfModalOpen(true);
+                }}
+                handleDeletePdf={handleDeletePdf}
+              />
+            )}
             {activeTab === 'audit' && <AuditManagement refreshTrigger={refreshTrigger} />}
           </div>
         </main>
@@ -282,6 +335,21 @@ const AdminDashboard = () => {
         setPdfFile={setPdfFile}
         setThumbnailFile={setThumbnailFile}
         onSubmit={handleUploadPdf}
+      />
+
+      <EditPdfModal
+        isOpen={isEditPdfModalOpen}
+        onClose={() => {
+          setIsEditPdfModalOpen(false);
+          setPdfFile(null);
+          setThumbnailFile(null);
+        }}
+        editingPdf={editingPdf}
+        setEditingPdf={setEditingPdf}
+        setPdfFile={setPdfFile}
+        setThumbnailFile={setThumbnailFile}
+        onSubmit={handleEditPdfSubmit}
+        phases={phases}
       />
 
       <ManageAccessModal

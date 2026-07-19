@@ -52,7 +52,7 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
     const order = req.query.order as string === 'asc' ? 1 : -1;
 
     const query: any = { isDeleted: { $ne: true }, role: 'User' };
-    
+
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
@@ -101,7 +101,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
     const generatedPassword = `${emailPrefix}@${mobileSuffix}`;
 
     const user = await User.create({ name, mobile, email, password: generatedPassword, role });
-    
+
     // Send email with credentials
     const appUrl = process.env.APP_URL || 'http://localhost:5173/login';
     await sendCredentialsEmail(email, generatedPassword, appUrl);
@@ -245,6 +245,66 @@ export const getPDFs = async (req: Request, res: Response): Promise<void> => {
     const whereClause = phaseId ? { phaseId } : {};
     const pdfs = await PDF.find(whereClause).sort({ order: 1 });
     res.json(pdfs);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const updatePDF = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const pdf = await PDF.findById(req.params.id);
+    if (!pdf) {
+      res.status(404).json({ message: 'PDF not found' });
+      return;
+    }
+
+    const { title, description, phaseId, order, status } = req.body;
+    if (title !== undefined) pdf.title = title;
+    if (description !== undefined) pdf.description = description;
+    if (phaseId !== undefined) pdf.phaseId = phaseId;
+    if (order !== undefined) pdf.order = order;
+    if (status !== undefined) pdf.status = status;
+
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    if (files) {
+      if (files.pdf && files.pdf[0]) {
+        if (pdf.filePath && fs.existsSync(pdf.filePath)) {
+          try { fs.unlinkSync(pdf.filePath); } catch (e) { console.error(e); }
+        }
+        pdf.filePath = files.pdf[0].path;
+      }
+      if (files.thumbnail && files.thumbnail[0]) {
+        if (pdf.thumbnailPath && fs.existsSync(pdf.thumbnailPath)) {
+          try { fs.unlinkSync(pdf.thumbnailPath); } catch (e) { console.error(e); }
+        }
+        pdf.thumbnailPath = files.thumbnail[0].path;
+      }
+    }
+
+    await pdf.save();
+    res.json(pdf);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const deletePDF = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const pdf = await PDF.findById(req.params.id);
+    if (!pdf) {
+      res.status(404).json({ message: 'PDF not found' });
+      return;
+    }
+
+    if (pdf.filePath && fs.existsSync(pdf.filePath)) {
+      try { fs.unlinkSync(pdf.filePath); } catch (e) { console.error('Failed to delete file', e); }
+    }
+    if (pdf.thumbnailPath && fs.existsSync(pdf.thumbnailPath)) {
+      try { fs.unlinkSync(pdf.thumbnailPath); } catch (e) { console.error('Failed to delete thumbnail', e); }
+    }
+
+    await PDF.deleteOne({ _id: req.params.id });
+    res.json({ message: 'PDF deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }

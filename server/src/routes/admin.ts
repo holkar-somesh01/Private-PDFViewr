@@ -3,7 +3,7 @@ import express from 'express';
 import { 
   getUsers, createUser, updateUser, deleteUser, resetPassword, 
   getPhases, createPhase,
-  uploadPDF, getPDFs, 
+  uploadPDF, getPDFs, updatePDF, deletePDF,
   assignPhasesToUser, getUserPhases, getDashboardStats 
 } from '../controllers/adminController.js';
 import { protect, admin } from '../middlewares/authMiddleware.js';
@@ -33,6 +33,10 @@ router.route('/phases')
 router.route('/pdfs')
   .get(getPDFs)
   .post(upload.fields([{ name: 'pdf', maxCount: 1 }, { name: 'thumbnail', maxCount: 1 }]), uploadPDF);
+
+router.route('/pdfs/:id')
+  .put(upload.fields([{ name: 'pdf', maxCount: 1 }, { name: 'thumbnail', maxCount: 1 }]), updatePDF)
+  .delete(deletePDF);
 
 router.route('/users/:id/phases')
   .get(getUserPhases);

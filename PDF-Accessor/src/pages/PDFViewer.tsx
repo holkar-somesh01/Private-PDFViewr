@@ -182,7 +182,7 @@ const PDFPage = React.memo(({
 const PDFViewer = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   const [pdfDoc, setPdfDoc] = useState<any>(null);
   const [pageNum, setPageNum] = useState(1);
@@ -453,7 +453,7 @@ const PDFViewer = () => {
             <div className="flex flex-col items-center max-w-md text-center p-8">
               <AlertTriangle className="w-16 h-16 text-red-500 mb-6 animate-pulse" />
               <h3 className="text-3xl font-bold mb-4">Security Lockdown</h3>
-              <p className="text-gray-300 text-lg mb-8">{blurReason}</p>
+              <p className="text-gray-300 text-lg mb-8 whitespace-pre-wrap">{blurReason}</p>
               <p className="text-gray-500 text-sm">Click anywhere on this window to resume viewing.</p>
             </div>
           </div>

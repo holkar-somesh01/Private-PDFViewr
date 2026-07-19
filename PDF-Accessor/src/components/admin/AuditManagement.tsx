@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
-import { Search, ChevronLeft, ChevronRight, Activity, Filter } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Activity } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface AuditManagementProps {

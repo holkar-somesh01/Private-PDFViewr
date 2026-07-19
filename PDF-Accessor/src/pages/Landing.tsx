@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { ShieldCheck, Download, Play, MessageCircle, Star, BookOpen, CheckCircle, BrainCircuit, Activity } from 'lucide-react';
+import { ShieldCheck, Play, MessageCircle, Star, BookOpen, CheckCircle, BrainCircuit, Activity } from 'lucide-react';
 import Logo from '../assets/Logo.jpeg';
 import LogoName from '../assets/logoName.jpeg';
 

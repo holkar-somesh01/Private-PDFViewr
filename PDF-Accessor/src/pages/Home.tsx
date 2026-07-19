@@ -15,7 +15,18 @@ const Home = () => {
   const [pdfs, setPdfs] = useState<PDF[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [expandedDescIds, setExpandedDescIds] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
+
+  const toggleDescription = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    setExpandedDescIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   useEffect(() => {
     const fetchAssignedPDFs = async () => {
@@ -114,7 +125,7 @@ const Home = () => {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-bold text-gray-800">Available Notes <span className="text-gray-400 text-sm ml-2 font-medium">({filteredPdfs.length})</span></h2>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 md:gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 md:gap-8 items-start">
             {filteredPdfs.map(pdf => (
               <div 
                 key={pdf._id}
@@ -123,7 +134,7 @@ const Home = () => {
               >
                 <div className="aspect-[1/1.414] w-full bg-slate-100 relative overflow-hidden flex-shrink-0 flex items-center justify-center">
                   <img 
-                    src={`http://${window.location.hostname}:5000/api/pdfs/thumbnail/${pdf._id}`}
+                    src={`${api.defaults.baseURL}/pdfs/thumbnail/${pdf._id}`}
                     alt={pdf.title}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     onError={(e) => {
@@ -149,9 +160,19 @@ const Home = () => {
                   <h3 className="font-bold text-gray-900 line-clamp-2 leading-tight mb-2 group-hover:text-emerald-600 transition-colors" title={pdf.title}>
                     {pdf.title}
                   </h3>
-                  <p className="text-xs text-gray-500 line-clamp-2 font-medium mt-auto">
-                    {pdf.description}
-                  </p>
+                  <div className="mt-auto pt-2 relative z-10">
+                    <p className={`text-xs text-gray-500 font-medium transition-all whitespace-pre-wrap ${expandedDescIds.has(pdf._id) ? '' : 'line-clamp-2'}`}>
+                      {pdf.description}
+                    </p>
+                    {pdf.description && pdf.description.length > 80 && (
+                      <button 
+                        onClick={(e) => toggleDescription(e, pdf._id)}
+                        className="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 mt-1.5 uppercase tracking-wider bg-emerald-50 px-2 py-1 rounded-md transition-colors"
+                      >
+                        {expandedDescIds.has(pdf._id) ? 'Show Less' : 'Show More'}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

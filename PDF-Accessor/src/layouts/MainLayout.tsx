@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserCircle, LogOut } from 'lucide-react';
+import { UserCircle, LogOut, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../assets/Logo.jpeg';
@@ -41,7 +41,9 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <button onClick={() => navigate('/')} className="hover:text-emerald-600 transition-colors">Home</button>
             <button onClick={() => handleScrollTo('about')} className="hover:text-emerald-600 transition-colors">About</button>
             <button onClick={() => handleScrollTo('courses')} className="hover:text-emerald-600 transition-colors">Subjects</button>
-            <button onClick={() => navigate('/phases')} className="hover:text-emerald-600 transition-colors">Notes</button>
+            {isAuthenticated && (
+              <button onClick={() => navigate('/phases')} className="hover:text-emerald-600 transition-colors">Dashboard</button>
+            )}
           </nav>
 
           <div className="flex items-center gap-4">
@@ -87,6 +89,16 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                         <p className="font-bold text-gray-900 truncate">{user?.name}</p>
                         <p className="text-gray-500 text-xs truncate mt-0.5">{user?.email}</p>
                       </div>
+                      <button
+                        onClick={() => {
+                          setIsProfileOpen(false);
+                          navigate('/phases');
+                        }}
+                        className="w-full text-left px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 rounded-xl flex items-center gap-2 transition-colors mb-1 md:hidden"
+                      >
+                        <LayoutDashboard className="w-4 h-4" />
+                        Dashboard
+                      </button>
                       <button
                         onClick={handleLogout}
                         className="w-full text-left px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 rounded-xl flex items-center gap-2 transition-colors"

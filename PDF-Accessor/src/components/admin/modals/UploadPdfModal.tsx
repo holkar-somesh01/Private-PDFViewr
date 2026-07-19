@@ -63,14 +63,17 @@ const UploadPdfModal: React.FC<UploadPdfModalProps> = ({
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Description</label>
-              <input 
-                type="text" 
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5 flex justify-between">
+                <span>Description</span>
+                <span className="text-[10px] font-medium text-slate-400 bg-slate-200/50 px-2 py-0.5 rounded-full">Line breaks supported</span>
+              </label>
+              <textarea 
                 placeholder="Detailed notes for Anatomy chapter 1..." 
                 required 
+                rows={4}
                 value={newPdf.description} 
                 onChange={e => setNewPdf({ ...newPdf, description: e.target.value })} 
-                className="w-full border border-slate-200 bg-slate-50 px-4 py-2.5 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all placeholder-slate-400" 
+                className="w-full border border-slate-200 bg-slate-50 px-4 py-2.5 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all placeholder-slate-400 resize-none whitespace-pre-wrap" 
               />
             </div>
             <div className="md:col-span-2 bg-slate-50 border-2 border-slate-200 border-dashed rounded-2xl p-6 text-center hover:bg-slate-100 transition-colors">

@@ -1,12 +1,17 @@
 import React from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import api from '../../services/api';
 
 interface PdfManagementProps {
   pdfs: any[];
   openUploadModal: () => void;
+  openEditModal: (pdf: any) => void;
+  handleDeletePdf: (pdfId: string) => void;
 }
 
-const PdfManagement: React.FC<PdfManagementProps> = ({ pdfs, openUploadModal }) => {
+const PdfManagement: React.FC<PdfManagementProps> = ({ pdfs, openUploadModal, openEditModal, handleDeletePdf }) => {
+  const navigate = useNavigate();
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
@@ -27,7 +32,7 @@ const PdfManagement: React.FC<PdfManagementProps> = ({ pdfs, openUploadModal }) 
           <div key={pdf._id || pdf.id} className="bg-white border border-slate-100 rounded-3xl shadow-sm overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
             <div className="aspect-[1/1.414] w-full bg-slate-100 relative overflow-hidden flex-shrink-0 flex items-center justify-center">
               <img
-                src={`http://${window.location.hostname}:5000/api/pdfs/thumbnail/${pdf._id || pdf.id}`}
+                src={`${api.defaults.baseURL}/pdfs/thumbnail/${pdf._id || pdf.id}`}
                 alt={pdf.title}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 onError={(e) => {
@@ -43,8 +48,31 @@ const PdfManagement: React.FC<PdfManagementProps> = ({ pdfs, openUploadModal }) 
                 </span>
               </div>
             </div>
-            <div className="p-5 bg-white">
-              <h4 className="font-bold text-slate-800 text-lg truncate mb-1" title={pdf.title}>{pdf.title}</h4>
+            <div className="p-5 bg-white relative">
+              <div className="absolute top-4 right-4 flex gap-1 bg-white/80 backdrop-blur-sm p-1 rounded-xl shadow-sm border border-slate-100/50">
+                <button 
+                  onClick={() => navigate(`/pdf/${pdf._id || pdf.id}`)}
+                  className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                  title="Preview PDF"
+                >
+                  <Eye className="w-4 h-4" />
+                </button>
+                <button 
+                  onClick={() => openEditModal(pdf)}
+                  className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  title="Edit PDF"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+                <button 
+                  onClick={() => handleDeletePdf(pdf._id || pdf.id)}
+                  className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  title="Delete PDF"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+              <h4 className="font-bold text-slate-800 text-lg truncate pr-16 mb-1" title={pdf.title}>{pdf.title}</h4>
               <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-3 opacity-80">Phase: {pdf.phaseId}</p>
               <p className="text-sm text-slate-500 font-medium line-clamp-2 leading-relaxed">{pdf.description}</p>
             </div>

@@ -20,8 +20,8 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<MainLayout><Landing /></MainLayout>} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/login/adminpanel" element={<Login isAdminLogin />} />
+      <Route path="/login" element={<MainLayout><Login /></MainLayout>} />
+      <Route path="/login/adminpanel" element={<MainLayout><Login isAdminLogin /></MainLayout>} />
 
       {/* Protected User Routes */}
       <Route path="/phases" element={<ProtectedRoute><MainLayout><Home /></MainLayout></ProtectedRoute>} />
