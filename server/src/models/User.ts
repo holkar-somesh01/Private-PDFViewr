@@ -9,6 +9,7 @@ export interface IUser extends Document {
   role: string;
   isActive: boolean;
   isBlocked: boolean;
+  isDeleted?: boolean;
   assignedPhases: mongoose.Types.ObjectId[];
   matchPassword(enteredPassword: string): Promise<boolean>;
   createdAt: Date;
@@ -63,7 +64,7 @@ const userSchema = new Schema<IUser>(
   }
 );
 
-userSchema.pre('save', async function (next) {
+userSchema.pre('save', async function (this: any, next) {
   if (!this.isModified('password') || !this.password) {
     next();
     return;
@@ -73,7 +74,7 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-userSchema.methods.matchPassword = async function (enteredPassword: string): Promise<boolean> {
+userSchema.methods.matchPassword = async function (this: any, enteredPassword: string): Promise<boolean> {
   if (!this.password) throw new Error('Password not loaded');
   return await bcrypt.compare(enteredPassword, this.password);
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface ManageAccessModalProps {
   isOpen: boolean;
@@ -6,7 +6,7 @@ interface ManageAccessModalProps {
   phases: any[];
   selectedPhaseIds: string[]; // Note: Assuming MongoDB ObjectIds are strings
   setSelectedPhaseIds: (ids: string[]) => void;
-  onSave: () => void;
+  onSave: () => Promise<void>;
 }
 
 const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
@@ -17,6 +17,17 @@ const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
   setSelectedPhaseIds,
   onSave,
 }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSave = async () => {
+    setIsSubmitting(true);
+    try {
+      await onSave();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -77,10 +88,21 @@ const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
             Cancel
           </button>
           <button
-            onClick={onSave}
-            className="flex-1 px-4 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200"
+            onClick={handleSave}
+            disabled={isSubmitting}
+            className="flex-1 px-4 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            Save Changes
+            {isSubmitting ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Saving...
+              </>
+            ) : (
+              'Save Changes'
+            )}
           </button>
         </div>
       </div>
